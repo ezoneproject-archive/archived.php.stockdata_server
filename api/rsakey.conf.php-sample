@@ -1,0 +1,16 @@
+<?php
+//
+// RSA keypair with openssl:
+// 1. openssl genrsa -out private.key 2048
+// 2. 'private.key' to $RSA_KEY['private_key']
+// 3. openssl rsa -in private.key -out public.pem -pubout -outform pem
+// 4. 'public.pem' to $RSA_KEY['public_key']
+//
+$RSA_KEY = array(
+    'private_key' =>
+        "-----BEGIN RSA PRIVATE KEY-----\n".
+        "-----END RSA PRIVATE KEY-----\n",
+    'public_key' =>
+        "-----BEGIN PUBLIC KEY-----\n".
+        "-----END PUBLIC KEY-----\n"
+);

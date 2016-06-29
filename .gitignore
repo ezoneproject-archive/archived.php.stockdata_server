@@ -1,0 +1,4 @@
+*.conf.php
+*.exe
+api/stockdata.txt
+phpinfo.php

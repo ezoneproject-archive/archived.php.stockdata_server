@@ -1,0 +1,16 @@
+<?php
+// API 페이지구분 (api)
+$API_TYPE = 'api';
+
+// DEBUG 모드 (RELEASE 시 삭제)
+error_reporting(E_ALL);
+ini_set('display_errors', true);
+ini_set('html_errors', false);
+
+$DB_CONN_STRING = array(
+    'url' => 'mysql_host',
+    'username' => 'mysql_username',
+    'password' => 'mysql_password',
+    'database' => 'mysql_database',
+);
+
