@@ -23,6 +23,27 @@ if (!is_null($resource_module) && strlen($resource_module) > 0) {
 }
 
 // ---------------------------------------------------------------- //
+// $request 변수 기본정보 생성
+// ---------------------------------------------------------------- //
+$resource_info = "";
+if (strlen($resource_name) > strlen($resource_real)) {
+    $resource_info = substr($resource_name, strlen($resource_real));
+    // 경로 앞의 '/' 제거
+    while (strcmp(substr($resource_info, 0, 1), "/") == 0) {
+        $resource_info = substr($resource_info, 1);
+    }
+}
+
+$request = array(
+    '_metadata' => array(
+        'RequestId' => $REQUEST_ID,
+        'ResourceKey' => $resource_real,        // 리소스 키(기본값)
+        'ResourceInfo' => $resource_info,       // 리소스 추가정보
+    ),
+);
+unset($resource_info);
+
+// ---------------------------------------------------------------- //
 // http일 경우, 데이터 암호화 옵션
 // ---------------------------------------------------------------- //
 // http 헤더에 RSA Public key 로 encrypt 한 Session key를 보낸다.
@@ -52,24 +73,7 @@ else {
     // 변수 정규화
     //
 
-    $resource_info = "";
-    if (strlen($resource_name) > strlen($resource_real)) {
-        $resource_info = substr($resource_name, strlen($resource_real));
-        // 경로 앞의 '/' 제거
-        while (strcmp(substr($resource_info, 0, 1), "/") == 0) {
-            $resource_info = substr($resource_info, 1);
-        }
-    }
-
-    $request = array(
-        '_metadata' => array(
-            'RequestId' => $REQUEST_ID,
-            'ResourceKey' => $resource_real,        // 리소스 키(기본값)
-            'ResourceInfo' => $resource_info,       // 리소스 추가정보
-        ),
-    );
-
-    //$_REQUEST[] 변수 뒤져서 정규화 한다
+    //$_REQUEST[] 변수 뒤져서 '_request'로 정규화 한다
     // GET/POST 는 여기에 포함됨
     foreach ($_REQUEST as $rkey => $rvalue) {
         // RESTful 하지는 못하지만 호스팅 환경에서 PUT, DELETE 안 될 때를 대비하여
@@ -81,72 +85,15 @@ else {
     }
     unset($rkey, $rvalue);
 
-//$putdata = fopen("php://input", "r");
-//while ($data = fread($putdata, 1024))
-/* 스트림 닫기 */
-//fclose($putdata);
-
-    // POST 모드일 때 Content-type 헤더 체크
-    if (isset($_SERVER['CONTENT_TYPE'])) {
-        // json decode
-        if (strcasecmp($_SERVER['CONTENT_TYPE'], 'application/json')) {
-        }
-        // xml
-        else if (strncasecmp($_SERVER['CONTENT_TYPE'], 'application/xml', 15)) {
-            // none
-        }
-        // upload
-        else if (strncasecmp($_SERVER['CONTENT_TYPE'], 'multipart/form-data', 19)) {
-            // none
-        }
-        // application/x-www-form-urlencoded => 이미 $_REQUEST 로 포함
-        else if (strcasecmp($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded')) {
-            // none
-        }
+    $post_data = "";
+    if (strcasecmp($_SERVER['REQUEST_METHOD'],"POST") == 0 ||
+        strcasecmp($_SERVER['REQUEST_METHOD'],"PUT") == 0) {
+        $post_data = file_get_contents("php://input");
+        post_data_handler($request, $post_data);
+        //print_r($request['post_data']);
     }
-
-// POST method 일 때 content-type 확인... json 인지 단순 form인지 체크하기 위함
-// $_SERVER["CONTENT_TYPE"]              application/x-www-form-urlencoded
+    unset($post_data);
 }
-
-/*
-// 한글은 UTF-8 사용
-$sig = hash_hmac('sha256', "한1234567890", "1");
-echo "signature: $sig\n";
-
-                //ae453b9d38f547d6410f9ab1bfca5639e91df7d483c4abe8a367b120e62a9e21
-                //ae453b9d38f547d6410f9ab1bfca5639e91df7d483c4abe8a367b120e62a9e21
-                //D0D5864932853745D4BBD7B57FE20E567DA4592E0E1D02C15CA190AFA0CDF2BE
-*/
-
-/* in CSharp
-            this.rijndael = new RijndaelManaged();
-            this.rijndael.Mode = CipherMode.CBC;
-            this.rijndael.Padding = PaddingMode.PKCS7;
-            this.rijndael.KeySize = 256;
-            this.rijndael.BlockSize = 128;
-
-$data = "12345123451234512355";
-
-echo "Enc[$encryption_key]\n";
-
-$data = openssl_encrypt($data, 'aes-256-cbc', $encryption_key, 0, $iv);
-//echo $data . "\n";
-
-// --------------------------------
-$encryption_key = 'abcaadefabcaadefabcaadefabcaadef';
-$iv = '                ';
-$encoded = rsa_encrypt($encryption_key, $RSA_KEY['public_key']);
-echo "encoded [[$encoded]]<br/>\n";
-
-$plain = rsa_decrypt($encoded, $RSA_KEY['private_key'], null);
-echo "dec: ($plain) <br/>\n";
-$plain2 = @base64_decode($plain, true);
-echo "dec: ($plain2) <br/>\n";
-*/
-
-
-
 
 // ---------------------------------------------------------------- //
 // API 인증 체크
@@ -183,35 +130,6 @@ if (strcmp($resource_auth, 'N')) {
 else {
     $request['_metadata']['ApiAccessId'] = -1;
 }
-
-// ---------------------------------------------------------------- //
-// 요청자료 정규화
-// ---------------------------------------------------------------- //
-
-// json 사용법
-// https://opentutorials.org/course/1375/6844
-// $data = json_decode(file_get_contents('php://input'), true);
-/*
- switch(json_last_error())
-    {
-        case JSON_ERROR_DEPTH:
-            echo ' - Maximum stack depth exceeded';
-        break;
-        case JSON_ERROR_CTRL_CHAR:
-            echo ' - Unexpected control character found';
-        break;
-        case JSON_ERROR_SYNTAX:
-            echo ' - Syntax error, malformed JSON';
-        break;
-        case JSON_ERROR_NONE:
-            echo ' - No errors';
-        break;
-    }
-    주의1.
-    json_decode 후에는 반드시 json_last_error 를 호출해야 함
-    주의2.
-    json_decode 는 php 버전따라서 특성을 탐
-*/
 
 // ---------------------------------------------------------------- //
 // function 실행

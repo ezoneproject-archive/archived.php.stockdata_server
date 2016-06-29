@@ -55,13 +55,33 @@ function api_get_samdata($request) {
     return $result;
 }
 
+
 // ---------------------------------------------------------------- //
-// 자료 마스터 목록
+// 자료 등록 처리
 // @return array(reportkey => reportname)
 // ---------------------------------------------------------------- //
-function get_samdata_list($request) {
+function api_create_samdata($request) {
     global $DB_CONN;
 
+    $resource_info = $request['_metadata']['ResourceInfo'];
+    $access_id = $request['_metadata']['ApiAccessId'];
+
+    // resource_info = "sam_key/date/time"
+    // 하나라도 어긋나면 die
+    //echo $resource_info;
+
+    //validate_sammast_id($access_id, $sam_key);
+
+    foreach ($request['post_data'] as $row) {
+        foreach ($row as $column) {
+            $fieldName = $column['FieldName'];
+            $fieldValue = $column['FieldValue'];
+
+
+        }
+    }
+
+    return array();
 }
 
 // api access id 와 sammast 검증 (sammast 에서 해당 테이블 이용 가능한지 검증)

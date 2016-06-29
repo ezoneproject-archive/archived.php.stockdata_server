@@ -90,6 +90,46 @@ function get_resource_name_from_uri() {
 }
 
 // ---------------------------------------------------------------- //
+// 입력자료 정규화 핸들러
+// ---------------------------------------------------------------- //
+function post_data_handler(&$request, $post_data) {
+    // json decode
+    if (strncasecmp(@$_SERVER['CONTENT_TYPE'], 'application/json', 16) == 0) {
+        $request['post_data'] = json_decode($post_data, true);
+        switch(json_last_error()) {
+        case JSON_ERROR_DEPTH:
+            die2(400, 'json_decode: Maximum stack depth exceeded');
+            break;
+        case JSON_ERROR_CTRL_CHAR:
+            die2(400, 'json_decode: Unexpected control character found');
+            break;
+        case JSON_ERROR_SYNTAX:
+            die2(400, 'json_decode: Syntax error, malformed JSON');
+            break;
+        case JSON_ERROR_NONE:
+            break;
+        }
+        //print_r($request['post_data']);
+    }
+    // xml
+    else if (strncasecmp(@$_SERVER['CONTENT_TYPE'], 'application/xml', 15) == 0) {
+        // not supported
+        die2(400, 'not supported content-type: application/xml');
+    }
+    /*
+    // upload
+    else if (strncasecmp(@$_SERVER['CONTENT_TYPE'], 'multipart/form-data', 19) == 0) {
+        // do nothing
+    }
+    // application/x-www-form-urlencoded => 이미 $_REQUEST 로 포함
+    else if (strncasecmp(@$_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded', 33) == 0) {
+        // do nothing
+    }
+    */
+}
+
+
+// ---------------------------------------------------------------- //
 // MySQL DB 접속 핸들러
 // ---------------------------------------------------------------- //
 function connect_database() {
