@@ -54,7 +54,7 @@ function is_api_available($resource_name) {
             $stmt->close();
         }
         else
-            die2(500, "Internal Server Error (query)");
+            die2(500, "Internal Server Error (query)", $DB_CONN->error);
 
         // resource uri 의 마지막 항목 삭제
         unset($resource_arr[count($resource_arr) -1]);

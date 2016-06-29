@@ -1,23 +1,5 @@
 <?php
 
-// 한
-
-/*
-CREATE TABLE `SAMDATA` (
-	GSDATE VARCHAR(8) NOT NULL,
-	GSTIME VARCHAR(6) NOT NULL,
-	SAM_KEY INT(11) NOT NULL COMMENT 'SAMMAST PK',
-	STCODE VARCHAR(10) NOT NULL,
-	ITEM_KEY INT(11) NOT NULL COMMENT 'SAMSTRUCT KEY',
-	DATA VARCHAR(100) NOT NULL,
-	PRIMARY KEY (`GSDATE`, `GSTIME`, `SAM_KEY`, `STCODE`, `ITEM_KEY`)
-)
-COMMENT='자료파일 데이터'
-COLLATE='utf8_general_ci'
-ENGINE=MyISAM
-;
-*/
-
 // ---------------------------------------------------------------- //
 // 자료 마스터 목록 또는 상세정보 분기
 // ---------------------------------------------------------------- //

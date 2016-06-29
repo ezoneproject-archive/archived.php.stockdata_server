@@ -1,28 +1,5 @@
 <?php
 
-/* 지원하는 해시 알고리즘 목록
-$algos = hash_algos();
-echo "-------------------<br/>\n";
-foreach ($algos as $key => $value) {
-    echo "$key => $value <br/>\n";
-}
-echo "-------------------<br/>\n";
-*/
-
-/*
-AWS sample:
-
-GET https://test.com/?Action=ListUsers&Version=2010-05-08 HTTP/1.1
-Content-Type: application/x-www-form-urlencoded; charset=utf-8
-Host: test.com
-X-Amz-Date: 20150830T123600Z
-Authorization: AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7
-
-// or 
-GET https://test.com?Action=ListUsers&Version=2010-05-08&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIDEXAMPLE%2F20150830%2Fus-east-1%2Fiam%2Faws4_request&X-Amz-Date=20150830T123600Z&X-Amz-Expires=60&X-Amz-SignedHeaders=content-type%3Bhost&X-Amz-Signature=37ac2f4fde00b0ac9bd9eadeb459b1bbee224158d66e7ae5fcadb70b2d181d02 HTTP/1.1
-*/
-
-
 // ---------------------------------------------------------------- //
 // 인증 방법 및 버전
 // ---------------------------------------------------------------- //
@@ -113,6 +90,6 @@ function validate_authentication($authorization_raw, $resource_name_uri) {
         return $r_access_id;
     }
     else
-        die2(500, "Internal Server Error (query)");
+        die2(500, "Internal Server Error (query)", $DB_CONN->error);
 }
 
