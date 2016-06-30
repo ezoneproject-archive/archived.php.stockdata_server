@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# 제외할 DIR/FILE : 이거 없으면 재귀호출 오류 발생함
+RewriteCond $1 !^(index\.php|index\.html|robots\.txt)
+
+### 여기 주석처리해서 모든 URL을 예외없이 모두 index.php로 보낸다
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ /index.php?$1 [L]
+
+# git 디렉터리는 index.php 로 rewirte
+RewriteRule ^.git/(.*)$ ./index.html [L]
+</IfModule>
+

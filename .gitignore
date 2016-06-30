@@ -2,3 +2,4 @@
 *.exe
 api/stockdata.txt
 phpinfo.php
+.ftpmessage
