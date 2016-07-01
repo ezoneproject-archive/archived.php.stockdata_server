@@ -162,6 +162,41 @@ function disconnect_database() {
     }
 }
 
+// $DBCONN->prepare() 에서 쿼리를 가변으로 생성할 때 사용
+// ex) $params = array("iiss", 1, 2, "testarg", "testarg2");
+//     call_user_func_array(array($stmt, "bind_param"), refValues($params));
+function refValues($arr){
+        if (strnatcmp(phpversion(),'5.3') >= 0) //Reference is required for PHP 5.3+
+        {
+            $refs = array();
+            foreach($arr as $key => $value)
+                $refs[$key] = &$arr[$key];
+            return $refs;
+        }
+        return $arr;
+    }
+
+/* bind에서도 사용 가능함
+$meta = $stmt->result_metadata();
+
+while ( $field = $meta->fetch_field() ) {
+   $parameters[] = &$row[$field->name];
+}  
+
+call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
+
+while ( $stmt->fetch() ) {  
+    $x = array();  
+    foreach( $row as $key => $val ) {  
+        $x[$key] = $val;  
+    }  
+    $results[] = $x;  
+}
+
+//$result = $results;
+$stmt->close();
+*/
+
 // ---------------------------------------------------------------- //
 // 공통 에러 핸들러
 // ---------------------------------------------------------------- //

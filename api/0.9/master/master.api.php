@@ -45,7 +45,7 @@ function get_sammast_list($request) {
         $stmt->close();
 
         // 조회할 자료가 없으면 404 Not found 로 응답
-        if (count($result) == 0)
+        if (count($result['masterList']) == 0)
             die2(404, "Not found");
 
         // 세부정보 추가
@@ -110,20 +110,5 @@ function get_sammast_struct($sam_key) {
         die2(500, "Internal Server Error (query:get_sammast_struct)", $DB_CONN->error);
 
     return $result;
-}
-
-// ---------------------------------------------------------------- //
-// 종목코드 관리
-// ---------------------------------------------------------------- //
-function api_get_stockcode($request) {
-    global $DB_CONN;
-
-    $resource_info = $request['_metadata']['ResourceInfo'];
-/*
-    if (strlen($resource_info) == 0)
-        return get_sammast_list($request);
-    else
-        die2(404, "Not found");   // 세부정보 보여주는 건 지원하지 않음
-*/
 }
 
