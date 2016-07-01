@@ -279,9 +279,6 @@ function api_delete_samdata($request) {
         }
         else {
             $stmt->close();
-            if ($mysqli->affected_rows == 0) {
-                die2(404, "No data for delete.");
-            }
         }
     }
     else
