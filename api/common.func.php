@@ -201,7 +201,10 @@ $stmt->close();
 // 공통 에러 핸들러
 // ---------------------------------------------------------------- //
 function die2($statusCode, $message, $optional_variable = '') {
-    global $REQUEST_ID, $DB_CONN_STRING, $DB_CONN;
+    global $REQUEST_ID, $DB_CONN_STRING, $DB_CONN, $request;
+
+    if (!isset($request['_metadata']['ApiKey']))
+        $request['_metadata']['ApiKey'] = "";
 
     $debugTrace1 = debug_backtrace();
     // 불필요하게 많은 trace는 배제
@@ -266,10 +269,10 @@ function die2($statusCode, $message, $optional_variable = '') {
 
     if (isset($DB_CONN_STRING['connected'])) {
         // DB에 접속되어 있으면 오류내역을 로그로 기록해둔다.
-        if ($stmt = @$DB_CONN->prepare("INSERT INTO ERRORLOG (DATE, TIME, MESSAGE, TRACE) VALUES (CURDATE(), CURTIME(), ?, ?)")) {
-            @$stmt->bind_param("ss", $msgjson, $debugTrace);
+        if ($stmt = @$DB_CONN->prepare("INSERT INTO ERRORLOG (DATE, TIME, API_KEY, REQUEST_ID, MESSAGE, TRACE) VALUES (CURDATE(), CURTIME(), ?, ?, ?, ?)")) {
+            @$stmt->bind_param("ssss", $request['_metadata']['ApiKey'], $REQUEST_ID, $msgjson, $debugTrace);
             @$stmt->execute();
-            //$stmt->affected_rows
+            //echo $stmt->affected_rows;
             @$stmt->close();
         }
 

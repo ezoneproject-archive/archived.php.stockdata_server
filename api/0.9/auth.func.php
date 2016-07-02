@@ -87,7 +87,7 @@ function validate_authentication($authorization_raw, $resource_name_uri) {
             die2(401, "Invalid secret signature.", $signature2);
         }
 
-        return $r_access_id;
+        return array($r_access_id, $api_key);
     }
     else
         die2(500, "Internal Server Error (query)", $DB_CONN->error);

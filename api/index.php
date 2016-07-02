@@ -121,14 +121,16 @@ if (strcmp($resource_auth, 'N')) {
         die2(401, "Authorization header required.");
 
     // 인증정보 검증 처리
-    $access_id = validate_authentication($authorization, $resource_name);
+    list($access_id, $api_key) = validate_authentication($authorization, $resource_name);
     // api 키 set
     $request['_metadata']['ApiAccessId'] = $access_id;
+    $request['_metadata']['ApiKey'] = $api_key;
     unset($authorization);
-    unset($access_id);
+    unset($access_id, $api_key);
 }
 else {
     $request['_metadata']['ApiAccessId'] = -1;
+    $request['_metadata']['ApiKey'] = "";
 }
 
 // ---------------------------------------------------------------- //
@@ -140,6 +142,20 @@ if (is_null($resource_function) || strlen($resource_function) == 0) {
 }
 
 if (function_exists($resource_function)) {
+    // GET 이 아닐 경우, API 이용로그를 남긴다.
+    if (strcmp($_SERVER["REQUEST_METHOD"], "GET")) {
+        $msgjson = html_entity_decode(json_encode($request));
+
+        if ($stmt = @$DB_CONN->prepare("INSERT INTO APILOG (DATE, TIME, API_KEY, REQUEST_ID, METHOD, RESOURCE, MESSAGE) VALUES (CURDATE(), CURTIME(), ?, ?, ?, ?, ?)")) {
+            @$stmt->bind_param("sssss", $request['_metadata']['ApiKey'], $REQUEST_ID, $_SERVER["REQUEST_METHOD"],
+                $request['_metadata']['ResourceKey'], $msgjson);
+            @$stmt->execute();
+            //echo $stmt->affected_rows;
+            @$stmt->close();
+        }
+        unset($msgjson, $stmt);
+    }
+
     // 실행하는 부분
     $result = $resource_function($request);
 
