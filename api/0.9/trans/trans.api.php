@@ -282,7 +282,7 @@ function api_delete_samdata($request) {
         }
     }
     else
-        die2(500, "Internal Server Error (query:api_create_samdata)", $DB_CONN->error);
+        die2(500, "Internal Server Error (query:api_delete_samdata)", $DB_CONN->error);
 
     return $result;
 }
