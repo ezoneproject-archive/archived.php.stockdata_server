@@ -29,8 +29,9 @@ function api_get_listview($request) {
     // sam_key 사용권한 확인
     validate_sammast_id($access_id, $sam_key);
 
+    // 시간대와 필드항목 4개가 픽스됨 (필드 순서는 바꿀 수 있지만 필드명이 변경되서는 안됨)
     $query = 
-        "SELECT GSDATE, STCODE, STNAME,\n".
+        "SELECT GSDATE, STCODE, STNAME,\n".             // 시간별 가로View merge
         "       MAX(FGN_0920) FGN_0920,\n".
         "       MAX(FGN_0950) FGN_0950,\n".
         "       MAX(INV_0950) INV_0950,\n".
@@ -41,7 +42,7 @@ function api_get_listview($request) {
         "       MAX(FGN_1505) FGN_1505,\n".
         "       MAX(INV_1505) INV_1505\n".
         "  FROM (\n".
-        "  SELECT GSDATE, STCODE, STNAME,\n".
+        "  SELECT GSDATE, STCODE, STNAME,\n".           // 시간별로 가로View로 생성
         "         IF(STRCMP(GSTIME,'0920'),'',FGN) FGN_0920,\n".
         "         IF(STRCMP(GSTIME,'0950'),'',FGN) FGN_0950,\n".
         "         IF(STRCMP(GSTIME,'0950'),'',INV) INV_0950,\n".
@@ -52,14 +53,14 @@ function api_get_listview($request) {
         "         IF(STRCMP(GSTIME,'1505'),'',FGN) FGN_1505,\n".
         "         IF(STRCMP(GSTIME,'1505'),'',INV) INV_1505\n".
         "    FROM (\n".
-        "    SELECT GSDATE, STCODE, STNAME, GSTIME, MAX(INV) INV, MAX(FGN) FGN\n".
+        "    SELECT GSDATE, STCODE, STNAME, GSTIME, MAX(INV) INV, MAX(FGN) FGN\n".  // 외인/기관 가로View merge
         "      FROM (\n".
-        "      SELECT GSDATE, STCODE, STNAME, GSTIME,\n".
+        "      SELECT GSDATE, STCODE, STNAME, GSTIME,\n".       // 외인/기관을 가로View로 생성
         "             IF(STRCMP(ITEM_NAME,'기관'),'',DATA) INV,\n".
         "             IF(STRCMP(ITEM_NAME,'외인'),'',DATA) FGN\n".
         "        FROM (\n".
         "        SELECT GSDATE, STCODE, GSTIME, DATA,\n".
-        "               (SELECT LEFT(ITEM_NAME, 2)\n".
+        "               (SELECT LEFT(ITEM_NAME, 2)\n".  // 외인/기관으로만 구분하기 위해 앞 2자리 자름
         "                  FROM SAMSTRUCT\n".
         "                 WHERE SAMSTRUCT.SAM_KEY = SAMDATA.SAM_KEY\n".
         "                   AND SAMSTRUCT.ITEM_KEY = SAMDATA.ITEM_KEY) ITEM_NAME,\n".
@@ -67,14 +68,14 @@ function api_get_listview($request) {
         "                 WHERE STOCKCODE.STCODE = SAMDATA.STCODE) STNAME\n".
         "          FROM SAMDATA\n".
         "         WHERE SAM_KEY = ?\n".
-        "           AND ((GSTIME <> '1505'\n".
+        "           AND ((GSTIME <> '1505'\n".  // 15:05 가 아닌 경우 잠정값
         "           AND ITEM_KEY IN (\n".
         "               SELECT ITEM_KEY\n".
         "                 FROM SAMSTRUCT\n".
         "                WHERE SAMSTRUCT.SAM_KEY = SAMDATA.SAM_KEY\n".
         "                  AND SAMSTRUCT.ITEM_NAME IN ('외인잠정', '기관잠정')\n".
         "               ))\n".
-        "            OR (GSTIME = '1505'\n".
+        "            OR (GSTIME = '1505'\n".    // 15:05 는 확정되므로 당일값 사용
         "           AND ITEM_KEY IN (\n".
         "               SELECT ITEM_KEY\n".
         "                 FROM SAMSTRUCT\n".
