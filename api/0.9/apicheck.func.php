@@ -7,6 +7,8 @@
 function is_api_available($resource_name) {
     global $API_TYPE, $API_VERSION, $DB_CONN;
 
+    require_once "apilist.inc.php";
+
     //
     if (isset($_REQUEST['method']))
         $method = $_REQUEST['method'];
@@ -32,29 +34,19 @@ function is_api_available($resource_name) {
     while (count($resource_arr) > 0) {
         $resource_name2 = implode('/', $resource_arr);
 
-        if ($stmt = @$DB_CONN->prepare("SELECT AUTHORIZE, MODULE, FUNCTION FROM APILIST WHERE TYPE = ? AND VERSION = ? AND METHOD = ? AND RESOURCE = ?")) {
-            $stmt->bind_param("ssss", $API_TYPE, $API_VERSION, $method, $resource_name2);
-            $stmt->execute();
-
-            //echo $stmt->field_count."<br>\n";
-            $stmt->bind_result($r_auth, $r_module, $r_function);
-
-            if ($stmt->fetch()) {
-                $stmt->close();
-
-                // found!
-                //echo "[$resource_name2]\n";
-
+        foreach ($API_LIST as $apiitem) {
+            if (strcasecmp($apiitem['type'], $API_TYPE) == 0 &&
+                strcasecmp($apiitem['version'], $API_VERSION) == 0 &&
+                strcasecmp($apiitem['method'], $method) == 0 &&
+                strcasecmp($apiitem['resource'], $resource_name2) == 0) {
+                // 일치하는 항목 발견
                 return array(
-                    $resource_name2,    // 실제 resouce (data 영역 제외)
-                    $r_auth,            // auth 여부
-                    $r_module,          // 구현된 module 명
-                    $r_function);       // call function명
+                    $resource_name2,        // 실제 resouce (data 영역 제외)
+                    $apiitem['authorize'],  // auth 여부
+                    $apiitem['module'],     // 구현된 module 명
+                    $apiitem['function']);  // call function명
             }
-            $stmt->close();
         }
-        else
-            die2(500, "Internal Server Error (query)", $DB_CONN->error);
 
         // resource uri 의 마지막 항목 삭제
         unset($resource_arr[count($resource_arr) -1]);
