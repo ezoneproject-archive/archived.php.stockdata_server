@@ -6,20 +6,6 @@ date_default_timezone_set('Asia/Seoul');
 // RequestID 채번
 $REQUEST_ID = uniqid($API_TYPE, true);
 
-// DB 접속
-$DB_CONN = connect_database();
-
-// 사용할 API 버전 설정
-$API_VERSION = get_api_version_from_uri();
-
-/////////////
-// INCLUDE //
-/////////////
-set_include_path(get_include_path() . PATH_SEPARATOR . $API_VERSION);
-require_once 'rsa.func.php';
-require_once 'apicheck.func.php';
-require_once 'auth.func.php';
-
 // ---------------------------------------------------------------- //
 // 요청 주소에서 API 버전 확인
 // ---------------------------------------------------------------- //
@@ -360,3 +346,16 @@ if (!function_exists('http_response_code')) {
     }
 }
 
+// DB 접속
+$DB_CONN = connect_database();
+
+// 사용할 API 버전 설정
+$API_VERSION = get_api_version_from_uri();
+
+/////////////
+// INCLUDE //
+/////////////
+set_include_path(get_include_path() . PATH_SEPARATOR . $API_VERSION);
+require_once 'rsa.func.php';
+require_once 'apicheck.func.php';
+require_once 'auth.func.php';
