@@ -43,11 +43,28 @@ $request = array(
 );
 unset($resource_info);
 
+//
+// 변수 정규화
+//
+
+//$_REQUEST[] 변수 뒤져서 '_request'로 정규화 한다
+// GET/POST 는 여기에 포함됨
+foreach ($_REQUEST as $rkey => $rvalue) {
+    // RESTful 하지는 못하지만 호스팅 환경에서 PUT, DELETE 안 될 때를 대비하여
+    // is_api_available() 에서 method 를 예약어로 사용하므로 제외처리
+    if (strcmp($rkey, "method") == 0)
+        continue;
+
+    $request['_request'][$rkey] = $rvalue;
+}
+unset($rkey, $rvalue);
+
 // ---------------------------------------------------------------- //
 // http일 경우, 데이터 암호화 옵션
 // ---------------------------------------------------------------- //
 // http 헤더에 RSA Public key 로 encrypt 한 Session key를 보낸다.
 // X-Encrypt-Key AES/256/CBC,<encrypted>
+$aes_key = "";
 if (isset($_SERVER['HTTP_X_ENCRYPT_KEY'])) {
     @list($enc_method, $rsa_enc_key) = explode(',', $_SERVER['HTTP_X_ENCRYPT_KEY'], 2);
     if (is_null($enc_method) || strlen($enc_method) == 0 ||
@@ -57,43 +74,24 @@ if (isset($_SERVER['HTTP_X_ENCRYPT_KEY'])) {
     if (strcmp($enc_method, "AES/256/CBC") != 0)
         die2(400, "Invalid X-Encrypt-Key encrypt method.", $enc_method);
 
-    $aes_key = rsa_decrypt($encoded, $RSA_KEY['private_key'], null);
-
-    // data를 aes decrypt 한다
-    $iv = '                ';
-    //$data = openssl_decrypt($data, 'aes-256-cbc', $aes_key, 0, $iv);
-
-    //echo "Encrypt enable ...<br/>";
-
-    // $_REQUEST[] 변수와 정규화 데이터 합한다.
-
+    $aes_key = rsa_decrypt($rsa_enc_key, $RSA_KEY['private_key'], null);
 }
-else {
-    //
-    // 변수 정규화
-    //
 
-    //$_REQUEST[] 변수 뒤져서 '_request'로 정규화 한다
-    // GET/POST 는 여기에 포함됨
-    foreach ($_REQUEST as $rkey => $rvalue) {
-        // RESTful 하지는 못하지만 호스팅 환경에서 PUT, DELETE 안 될 때를 대비하여
-        // is_api_available() 에서 method 를 예약어로 사용하므로 제외처리
-        if (strcmp($rkey, "method") == 0)
-            continue;
+$post_data = "";
+if (strcasecmp($_SERVER['REQUEST_METHOD'],"POST") == 0 ||
+    strcasecmp($_SERVER['REQUEST_METHOD'],"PUT") == 0) {
+    $post_data = file_get_contents("php://input");
 
-        $request['_request'][$rkey] = $rvalue;
+    if (strlen($aes_key) > 0) {
+        // data를 aes decrypt 한다
+        $iv = '                ';
+        $post_data = openssl_decrypt($post_data, 'aes-256-cbc', $aes_key, 0, $iv);
     }
-    unset($rkey, $rvalue);
 
-    $post_data = "";
-    if (strcasecmp($_SERVER['REQUEST_METHOD'],"POST") == 0 ||
-        strcasecmp($_SERVER['REQUEST_METHOD'],"PUT") == 0) {
-        $post_data = file_get_contents("php://input");
-        post_data_handler($request, $post_data);
-        //print_r($request['post_data']);
-    }
-    unset($post_data);
+    post_data_handler($request, $post_data);
+    //print_r($request['post_data']);
 }
+unset($post_data);
 
 // ---------------------------------------------------------------- //
 // API 인증 체크
@@ -198,8 +196,9 @@ else
 // ---------------------------------------------------------------- //
 // 응답 전송
 // ---------------------------------------------------------------- //
-if (isset($_SERVER['HTTP_X_ENCRYPT_KEY'])) {
-    set_header('text/plain');
+if (strlen($aes_key) > 0 && !headers_sent()) {
+    set_header('json');
+    header('X-Encrypted: enabled');
 
     // data를 aes encrypt 한다
     $iv = '                ';
