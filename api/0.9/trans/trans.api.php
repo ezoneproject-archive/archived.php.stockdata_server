@@ -171,6 +171,16 @@ function api_create_samdata($request) {
             // 미등록 종목코드 => 신규등록
             insert_stcode($stockCode, $stockName, $stockCate);
         }
+        // 종목 이름이 다를 경우(사명변경 등) 종목명 갱신
+        else {
+            foreach ($stcode_res as $stcode_item) {
+                if (strcmp($stockCode, $stcode_item['stockCode']) != 0)
+                    continue;
+                if (strcmp($stockName, $stcode_item['stockName']) == 0) {
+                    update_stcode($stockCode, $stockName, $stockCate);
+                }
+            }
+        }
 
         $colcnt = 0;
         foreach ($row as $column) {
