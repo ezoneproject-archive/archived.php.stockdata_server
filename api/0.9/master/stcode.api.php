@@ -109,3 +109,19 @@ function insert_stcode($stockCode, $stockName, $cateName) {
     else
         die2(500, "Internal Server Error (query:insert_stcode)", $DB_CONN->error);
 }
+
+// 종목코드명 변경
+function update_stcode($stockCode, $stockName, $cateName) {
+    global $DB_CONN;
+
+    if ($stmt = @$DB_CONN->prepare("UPDATE STOCKCODE SET STNAME = ?, CATENAME = ? WHERE STCODE = ?")) {
+        $stmt->bind_param("sss", $stockName, $cateName, $stockCode);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            die2(500, "Internal Server Error, Update data. (query:update_stcode)", $DB_CONN->error);
+        }
+        $stmt->close();
+    }
+    else
+        die2(500, "Internal Server Error (query:update_stcode)", $DB_CONN->error);
+}
