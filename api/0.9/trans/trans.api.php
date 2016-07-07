@@ -171,13 +171,17 @@ function api_create_samdata($request) {
             // 미등록 종목코드 => 신규등록
             insert_stcode($stockCode, $stockName, $stockCate);
         }
-        // 종목 이름이 다를 경우(사명변경 등) 종목명 갱신
+        // 종목은 있지만, 종목 이름이 다를 경우(사명변경 등) 종목명 갱신
         else {
             foreach ($stcode_res as $stcode_item) {
-                if (strcmp($stockCode, $stcode_item['stockCode']) != 0)
+                if (strcmp($stockCode, $stcode_item['stockCode']) != 0) {
+                    // 종목코드 불일치, 다음 종목으로 넘김
                     continue;
-                if (strcmp($stockName, $stcode_item['stockName']) == 0) {
+                }
+                if (strcmp($stockName, $stcode_item['stockName']) != 0) {
+                    // 종목코드 일치, 종목명 불일치, 종목명 갱신
                     update_stcode($stockCode, $stockName, $stockCate);
+                    break;
                 }
             }
         }
