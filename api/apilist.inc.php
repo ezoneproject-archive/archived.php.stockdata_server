@@ -20,6 +20,7 @@ $API_LIST = array(
         'module' => '',
         'function' => 'api_get_client_version',
     ),
+
     // SAM파일 구조 정보 ----------------------------------------------
     // SAM파일 목록 및 시간정보, 파일구조
     array(
@@ -60,6 +61,38 @@ $API_LIST = array(
         'authorize' => 'Y',
         'module' => 'trans/trans.api.php',
         'function' => 'api_delete_samdata',
+    ),
+
+    // 시스템관리 정보 ----------------------------------------------
+    // 거래로그 목록조회
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'GET',
+        'resource' => 'manager/log/list',
+        'authorize' => 'Y',
+        'module' => 'manager/accesslog.api.php',
+        'function' => 'api_get_apilog_list',
+    ),
+    // 거래로그 세부데이터 조회
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'GET',
+        'resource' => 'manager/log/entry',
+        'authorize' => 'Y',
+        'module' => 'manager/accesslog.api.php',
+        'function' => 'api_get_apilog_detail',
+    ),
+    // 거래로그 삭제
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'DELETE',
+        'resource' => 'manager/log',
+        'authorize' => 'Y',
+        'module' => 'manager/accesslog.api.php',
+        'function' => 'api_delete_apilog',
     ),
 
     // 레포트 구성 정보 ----------------------------------------------
