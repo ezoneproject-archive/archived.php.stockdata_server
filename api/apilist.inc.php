@@ -69,7 +69,7 @@ $API_LIST = array(
         'type' => 'api',
         'version' => '0.9',
         'method' => 'GET',
-        'resource' => 'manager/log/list',
+        'resource' => 'manager/log',
         'authorize' => 'Y',
         'module' => 'manager/accesslog.api.php',
         'function' => 'api_get_apilog_list',
@@ -93,6 +93,26 @@ $API_LIST = array(
         'authorize' => 'Y',
         'module' => 'manager/accesslog.api.php',
         'function' => 'api_delete_apilog',
+    ),
+    // 오류로그 목록조회
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'GET',
+        'resource' => 'manager/error',
+        'authorize' => 'Y',
+        'module' => 'manager/errorlog.api.php',
+        'function' => 'api_get_errorlog_list',
+    ),
+    // 오류로그 삭제
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'DELETE',
+        'resource' => 'manager/error',
+        'authorize' => 'Y',
+        'module' => 'manager/errorlog.api.php',
+        'function' => 'api_delete_errorlog',
     ),
 
     // 레포트 구성 정보 ----------------------------------------------
