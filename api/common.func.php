@@ -208,7 +208,7 @@ function die2($statusCode, $message, $optional_variable = '') {
     }
 */
 
-    $debugTrace = html_entity_decode(json_encode($debugTrace1));
+    $debugTrace = html_entity_decode(json_encode($debugTrace1), ENT_COMPAT, "UTF-8");
     if (strlen($debugTrace) > 65000) {
         $debugTrace = substr($debugTrace, 0, 65000);
     }
@@ -251,7 +251,7 @@ function die2($statusCode, $message, $optional_variable = '') {
         ),
     );
 
-    $msgjson = html_entity_decode(json_encode($msgvar));
+    $msgjson = html_entity_decode(json_encode($msgvar), ENT_COMPAT, "UTF-8");
 
     if (isset($DB_CONN_STRING['connected'])) {
         // DB에 접속되어 있으면 오류내역을 로그로 기록해둔다.

@@ -142,7 +142,7 @@ if (is_null($resource_function) || strlen($resource_function) == 0) {
 if (function_exists($resource_function)) {
     // GET 이 아닐 경우, API 이용로그를 남긴다.
     if (strcmp($_SERVER["REQUEST_METHOD"], "GET")) {
-        $msgjson = html_entity_decode(json_encode($request));
+        $msgjson = html_entity_decode(json_encode($request), ENT_COMPAT, "UTF-8");
 
         if ($stmt = @$DB_CONN->prepare("INSERT INTO APILOG (DATE, TIME, API_KEY, REQUEST_ID, METHOD, RESOURCE, MESSAGE) VALUES (CURDATE(), CURTIME(), ?, ?, ?, ?, ?)")) {
             @$stmt->bind_param("sssss", $request['_metadata']['ApiKey'], $REQUEST_ID, $_SERVER["REQUEST_METHOD"],
@@ -169,7 +169,7 @@ if (function_exists($resource_function)) {
             'RequestId' => $REQUEST_ID,
         );
 
-        $json_result = html_entity_decode(json_encode($result));
+        $json_result = html_entity_decode(json_encode($result), ENT_COMPAT, "UTF-8");
     }
     else {
         // json 컨버전 불가능한 경우는 오류...
@@ -187,7 +187,7 @@ if (function_exists($resource_function)) {
             )
         );
 
-        $json_result = html_entity_decode(json_encode($result2));
+        $json_result = html_entity_decode(json_encode($result2), ENT_COMPAT, "UTF-8");
     }
 }
 else
