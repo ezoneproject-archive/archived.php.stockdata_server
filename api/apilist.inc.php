@@ -62,6 +62,17 @@ $API_LIST = array(
         'module' => 'trans/trans.api.php',
         'function' => 'api_delete_samdata',
     ),
+    // 종목코드 조회 ----------------------------------------------
+    // 종목코드 검색
+    array(
+        'type' => 'api',
+        'version' => '0.9',
+        'method' => 'GET',
+        'resource' => 'stockcode',
+        'authorize' => 'N',
+        'module' => 'master/stcode.api.php',
+        'function' => 'api_get_stockcode',
+    ),
 
     // 시스템관리 정보 ----------------------------------------------
     // 거래로그 목록조회

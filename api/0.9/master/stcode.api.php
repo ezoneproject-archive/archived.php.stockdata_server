@@ -1,59 +1,55 @@
 <?php
 
 // ---------------------------------------------------------------- //
-// 종목코드 관리
+// 종목코드 검색
+// Resource: stockCode?query
+// stockCode: 종목코드(선택가능)
+// query : 선택
+//        search : 검색 키워드(종목코드 또는 종목명)
 // ---------------------------------------------------------------- //
 function api_get_stockcode($request) {
     global $DB_CONN;
 
     $resource_info = $request['_metadata']['ResourceInfo'];
-/*
-    if (strlen($resource_info) == 0)
-        return get_sammast_list($request);
-    else
-        die2(404, "Not found");   // 세부정보 보여주는 건 지원하지 않음
-*/
-}
 
+    $query = 
+        "SELECT STCODE, STNAME, CATENAME\n".
+        "  FROM STOCKCODE\n".
+        " WHERE 1 = ? \n";
+    $params = array("i", "1");
 
-// ---------------------------------------------------------------- //
-// 종목코드검색
-// ResourceInfo에 종목코드를 넣을 경우 해당 종목 검색(없을 경우 404 오류)
-// 또는 query string 으로 code=코드, name=종목명 으로 검색
-// ---------------------------------------------------------------- //
-function api_get_stcode($request) {
-    global $DB_CONN;
+    // resource_info 종목코드
+    if (strlen($resource_info) > 0) {
+        $query .= "   AND STCODE = ? \n";
+        $params[0] .= "s";
+        $params[] = $resource_info;
+    }
 
-//
-// TODO: develop now...
-//
+    // startno 추가
+    if (isset($request['_request']['search'])) {
+        $query .= "   AND (STCODE LIKE ? OR STNAME LIKE ?) \n";
+        $params[0] .= "ss";
+        $params[] = '%'.$request['_request']['search'].'%';
+        $params[] = '%'.$request['_request']['search'].'%';
+    }
 
-    $resource_info = $request['_metadata']['ResourceInfo'];
-
-    if (isset($request['_request']['start']))
-        $start_idx = $request['_request']['start'];
-    else
-        $start_idx = 1;
+    $query .= 
+        " ORDER BY STCODE\n".
+        " LIMIT 100 \n";
 
     $result = array('dataList' => array());
 
-    if ($stmt = @$DB_CONN->prepare(
-        "SELECT * FROM SAMDATA WHERE SAM_KEY = ? ORDER BY GSDATE, GSTIME, ITEM_KEY LIMIT 100")) {
-        $stmt->bind_param("i", $sam_key);
+    if ($stmt = @$DB_CONN->prepare($query)) {
+        call_user_func_array(array($stmt, "bind_param"), refValues($params));
         $stmt->execute();
 
-        $stmt->bind_result($r_gsdate, $r_gstime, $r_stcode, $r_stname, $r_itemkey, $r_itemname, $r_data);
+        $stmt->bind_result($r_stcode, $r_stname, $r_catename);
         while ($stmt->fetch())
         {
             $result['dataList'][] = array(
-                'masterId' => $sam_key,
-                'gsDate' => $r_gsdate,
-                'gsTime' => $r_gstime,
                 'stockCode' => $r_stcode,
                 'stockName' => $r_stname,
-                'itemKey' => $r_itemkey,
-                'itemName' => $r_itemname,
-                'data' => $r_data,
+                'cateName' => $r_catename,
             );
         }
         $stmt->close();
@@ -63,11 +59,13 @@ function api_get_stcode($request) {
             die2(404, "Not found");
     }
     else
-        die2(500, "Internal Server Error (query:api_get_stcode)", $DB_CONN->error);
+        die2(500, "Internal Server Error (query:api_get_stockcode)", $DB_CONN->error);
 
     return $result;
 }
 
+
+// -------------------------------------------------------------------------------------
 // 종목코드로 단일코드 검색
 function get_stcode_stcode($stockCode) {
     global $DB_CONN;
