@@ -10,8 +10,8 @@ function is_api_available($resource_name) {
     require_once "apilist.inc.php";
 
     //
-    if (isset($_REQUEST['method']))
-        $method = $_REQUEST['method'];
+    if (isset($_REQUEST['__method']))
+        $method = $_REQUEST['__method'];
     else
         $method = $_SERVER['REQUEST_METHOD'];
 

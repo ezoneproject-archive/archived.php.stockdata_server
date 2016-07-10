@@ -57,7 +57,7 @@ function validate_authentication($authorization_raw, $resource_name_uri) {
     // 요청일자 검증
     $curdate = gmdate('Ymd');
     if (strncmp($curdate, $request_date, 8) != 0)
-        die2(401, "Credential GMT/UTC date error.");
+        die2(401, "Credential GMT/UTC date error. Check your client's date and time.");
 
     // api key 검증
     if ($stmt = @$DB_CONN->prepare("SELECT ACCESS_ID, API_KEY, API_SECRET FROM ACCESSKEY WHERE API_KEY = ?")) {

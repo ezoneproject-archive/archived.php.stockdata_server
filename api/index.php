@@ -51,8 +51,8 @@ unset($resource_info);
 // GET/POST 는 여기에 포함됨
 foreach ($_REQUEST as $rkey => $rvalue) {
     // RESTful 하지는 못하지만 호스팅 환경에서 PUT, DELETE 안 될 때를 대비하여
-    // is_api_available() 에서 method 를 예약어로 사용하므로 제외처리
-    if (strcmp($rkey, "method") == 0)
+    // is_api_available() 에서 __method 를 예약어로 사용하므로 제외처리
+    if (strcmp($rkey, "__method") == 0)
         continue;
 
     $request['_request'][$rkey] = $rvalue;
@@ -141,11 +141,16 @@ if (is_null($resource_function) || strlen($resource_function) == 0) {
 
 if (function_exists($resource_function)) {
     // GET 이 아닐 경우, API 이용로그를 남긴다.
-    if (strcmp($_SERVER["REQUEST_METHOD"], "GET")) {
-        $msgjson = html_entity_decode(json_encode($request));
+    if (isset($_REQUEST['__method']))
+        $method = $_REQUEST['__method'];
+    else
+        $method = $_SERVER['REQUEST_METHOD'];
+
+    if (strcmp($method, "GET") != 0) {
+        $msgjson = html_entity_decode(json_encode($request), ENT_COMPAT, "UTF-8");
 
         if ($stmt = @$DB_CONN->prepare("INSERT INTO APILOG (DATE, TIME, API_KEY, REQUEST_ID, METHOD, RESOURCE, MESSAGE) VALUES (CURDATE(), CURTIME(), ?, ?, ?, ?, ?)")) {
-            @$stmt->bind_param("sssss", $request['_metadata']['ApiKey'], $REQUEST_ID, $_SERVER["REQUEST_METHOD"],
+            @$stmt->bind_param("sssss", $request['_metadata']['ApiKey'], $REQUEST_ID, $method,
                 $request['_metadata']['ResourceKey'], $msgjson);
             @$stmt->execute();
             //echo $stmt->affected_rows;
@@ -153,6 +158,7 @@ if (function_exists($resource_function)) {
         }
         unset($msgjson, $stmt);
     }
+    unset($method);
 
     // 실행하는 부분
     $result = $resource_function($request);
@@ -169,7 +175,7 @@ if (function_exists($resource_function)) {
             'RequestId' => $REQUEST_ID,
         );
 
-        $json_result = html_entity_decode(json_encode($result));
+        $json_result = html_entity_decode(json_encode($result), ENT_COMPAT, "UTF-8");
     }
     else {
         // json 컨버전 불가능한 경우는 오류...
@@ -187,7 +193,7 @@ if (function_exists($resource_function)) {
             )
         );
 
-        $json_result = html_entity_decode(json_encode($result2));
+        $json_result = html_entity_decode(json_encode($result2), ENT_COMPAT, "UTF-8");
     }
 }
 else
