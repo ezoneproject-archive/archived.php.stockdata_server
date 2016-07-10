@@ -7,7 +7,7 @@
 // query : 선택
 //        startno : 시작 일련번호
 //        apikey : API KEY
-//        method : none='ALL' or one of 'GET, POST, PUT, DELETE'
+//        type : none='ALL' or one of 'GET, POST, PUT, DELETE'
 //        requestid : RequestID
 // ---------------------------------------------------------------- //
 function api_get_apilog_list($request) {
@@ -58,11 +58,11 @@ function api_get_apilog_list($request) {
         $params[] = $request['_request']['apikey'];
     }
 
-    // method 추가
-    if (isset($request['_request']['method']) && strcmp('ALL', $request['_request']['method']) != 0) {
+    // type(method) 추가
+    if (isset($request['_request']['type']) && strcmp('ALL', $request['_request']['type']) != 0) {
         $query .= "   AND METHOD = ? \n";
         $params[0] .= "s";
-        $params[] = $request['_request']['method'];
+        $params[] = $request['_request']['type'];
     }
 
     // requestid 추가
