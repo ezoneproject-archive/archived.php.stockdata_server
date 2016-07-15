@@ -11,5 +11,6 @@ RewriteCond $1 !^(index\.php|index\.html|robots\.txt)
 
 # git 디렉터리 및 gitignore는 index.php 로 rewirte
 RewriteRule ^.git(.*)$ ./forbidden.html [L]
+RewriteRule ^db_(.*)$ ./forbidden.html [L]
 </IfModule>
 
